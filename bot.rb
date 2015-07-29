@@ -19,7 +19,6 @@ client.on :message do |msg|
   if(msg["type"] == "message")
     handle(client, msg)
   end
-  puts msg
 end
     
 client.main_loop
