@@ -47,15 +47,22 @@ dice_roller = Proc.new { | client, msg, channel |
   end
 }
 
+def make_mtgapi_req(str, url, strict = false)
+  if(strict)
+  then
+    str.gsub! /[:]/, ''
+  else
+    str.gsub! /[:,.!?']/, ''
+  end
+  str.gsub! '-', ' '
+  str.gsub! ' ', '%20'
+  str.gsub! "'", '%27'
+  uri = URI(url.sub '[text]', str)
+  return Net::HTTP.get(uri)
+end
+
 gatherer = Proc.new { |client, msg, channel |
-  puts msg
-  msg.gsub! /[:,.!?']/, ''
-  msg.gsub! '-', ' '
-  msg.gsub! ' ', '%20'
-  puts msg
-  uri = URI("http://api.mtgdb.info/search/text?start=0&limit=1".sub 'text', msg)
-  puts uri.to_s
-  res = Net::HTTP.get(uri)
+  res = make_mtgapi_req(msg, "http://api.mtgdb.info/search/[text]?limit=1")
   begin
     response = JSON.parse(res)
   rescue JSON::ParserError => e
@@ -66,17 +73,11 @@ gatherer = Proc.new { |client, msg, channel |
     client.send({type: "message",
                  channel: channel,
                  text: "http://api.mtgdb.info/content/card_images/id.jpeg".sub('id', response[0]["id"].to_s) + "\n" + "```" + response[0]["description"] + "```"})
-  else puts "No response!"
   end
 }
 
 gather_exact = Proc.new { |client, msg, channel |
-  msg.gsub! /:/, ''
-  msg.gsub!'-', ' '
-  msg.gsub! ' ', '%20'
-  uri = URI("http://api.mtgdb.info/search/?q=name%20eq%20%27text%27&start=0&limit=1".sub 'text', msg)
-  puts uri.to_s
-  res = Net::HTTP.get(uri)
+   res = make_mtgapi_req(msg, "http://api.mtgdb.info/search?q=name%20eq%20%27[text]%27&limit=1", true)
   begin
     response = JSON.parse(res)
   rescue JSON::ParserError => e
