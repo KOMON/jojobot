@@ -73,6 +73,10 @@ gatherer = Proc.new { |client, msg, channel |
     client.send({type: "message",
                  channel: channel,
                  text: "http://api.mtgdb.info/content/card_images/id.jpeg".sub('id', response[0]["id"].to_s) + "\n" + "```" + response[0]["description"] + "```"})
+
+  else client.send({type: "message",
+                    channel: channel,
+                    text: "Card not found!"})
   end
 }
 
@@ -88,10 +92,21 @@ gather_exact = Proc.new { |client, msg, channel |
     client.send({type: "message",
                  channel: channel,
                  text: "http://api.mtgdb.info/content/card_images/id.jpeg".sub('id', response[0]["id"].to_s) + "\n" + "```" + response[0]["description"] + "```"})
-  else puts "No response!"
+
+  else client.send({type: "message",
+                    channel: channel,
+                    text: "Card not found!"})
   end
 }
 
+joseph = Proc.new { |client, msg, channel |
+  responses = ["OH MAI GAADUU!
+", "OHH GAADU!", "OHHH SHIITU!", "SON OF A BIITCHU!"]
+  client.send({type: "message",
+               channel: channel,
+               text: responses.sample,
+               icon_url: "http://i.imgur.com/TwHoamA.jpg"})
+}
 
 $handlers = {
   '(^hello,*\s*jojo(bot)?[\.!?]*)' => responder(["Hello to you too"]),
@@ -100,6 +115,7 @@ $handlers = {
   '(\[.+?\])' => dice_roller,
   '(eh,*\s*jojo(bot)?\?|isn\'t\s+that\s+right,*\s*jojo(bot)?\?)' => responder(["Yeah!", "Sure", "...", "Nah", "Not really"]),
   '\[\[(.*?)\]\]' => gatherer,
-  '\{\{(.*?)\}\}' => gather_exact
+  '\{\{(.*?)\}\}' => gather_exact,
+  '(omg | oh my god | holy shit)' => joseph
 }
 
