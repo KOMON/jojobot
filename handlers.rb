@@ -15,44 +15,37 @@ def responder(response_arr)
 end
 
 def die_eval(str)
-  res_arr = []
-  match_arr = str.scan(/(\[.*?((\d*)d(\d+)).*?\])/)
+  math = str
+  match_arr = str.scan(/((\d*)d(\d+))/)
   match_arr.each { |exp| 
     result = 0
-    exp[2].to_i.times do result += rand(1..exp[3].to_i) end
-    math = exp[0].sub exp[1], result.to_s
-    begin
-      result =  eval(math.gsub /[\[\]]/,'')
-    rescue SyntaxError => e
-      res_arr.push [exp[0], "Syntax Error", nil]
-    end
-    res_arr.push [exp[0], math, result]
+    exp[1].to_i.times do result += rand(1..exp[2].to_i) end
+    math = math.sub exp[0], result.to_s
   }
-  return res_arr
+  begin
+    result =  eval(math.gsub /[\[\]]/,'')
+  rescue SyntaxError => e
+    return [str, "Syntax Error", nil]
+  end
+  return [str, math, result]
 end
 
 
 dice_roller = Proc.new { | client, msg, channel |
   result = die_eval(msg)
   unless !result
-    message = ""
-    result.each { |res|
-      unless !res[2]
-        message += res[0] + " => " + res[1] + " => *" + res[2].to_s + "*\n"
-      else message += res[0] + " => Syntax Error\n"
-      end}
     client.send({type: "message",
                  channel: channel,
-                 text: message})
+                 text: result[0] + " => " + result[1] + " => *" + result[2].to_s + "*"})
   end
 }
 
 def make_mtgapi_req(str, url, strict = false)
   if(strict)
   then
-    str.gsub! /[:]/, ''
+    str.gsub! /[:\"]/, ''
   else
-    str.gsub! /[:,.!?']/, ''
+    str.gsub! /[:,.!?'\"]/, ''
   end
   str.gsub! '-', ' '
   str.gsub! ' ', '%20'
@@ -100,22 +93,21 @@ gather_exact = Proc.new { |client, msg, channel |
 }
 
 joseph = Proc.new { |client, msg, channel |
-  responses = ["OH MAI GAADUU!
-", "OHH GAADU!", "OHHH SHIITU!", "SON OF A BIITCHU!"]
+  puts "called"
+  responses = ["OH MAI GAADUU!", "OHH GAADU!", "OHHH SHIITU!", "SON OF A BIITCHU!"]
   client.send({type: "message",
                channel: channel,
-               text: responses.sample,
-               icon_url: "http://i.imgur.com/TwHoamA.jpg"})
+               text: "http://i.imgur.com/TwHoamA.jpg\n" + responses.sample})
 }
 
 $handlers = {
   '(^hello,*\s*jojo(bot)?[\.!?]*)' => responder(["Hello to you too"]),
   '(menacing)' => responder(["```ゴ        ゴ              ゴ\n    ゴ      ゴ \n      ゴ            \n    ゴ   ゴ \n     ゴ      ゴ    ゴ         ゴ ゴ```"]),
   '(how troublesome|oh dear|oh bother|good grief|jeeze)' => responder(["やれやれだぜ..."]),
-  '(\[.+?\])' => dice_roller,
+  '(\[.+?\d*d\d+\])' => dice_roller,
   '(eh,*\s*jojo(bot)?\?|isn\'t\s+that\s+right,*\s*jojo(bot)?\?)' => responder(["Yeah!", "Sure", "...", "Nah", "Not really"]),
   '\[\[(.*?)\]\]' => gatherer,
   '\{\{(.*?)\}\}' => gather_exact,
-  '(omg | oh my god | holy shit)' => joseph
+  '(omg|oh my god|holy shit)' => joseph
 }
 
