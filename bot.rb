@@ -1,7 +1,10 @@
 require 'slack-rtmapi'
 require './handlers.rb'
 require './token.rb'
-url = SlackRTM.get_url token: $token
+
+req = Net::HTTP.post_form URI('https://slack.com/api/rtm.start'), token: $token
+body = JSON.parse req.body
+url = URI(body['url'])
 client = SlackRTM::Client.new websocket_url: url
 
 

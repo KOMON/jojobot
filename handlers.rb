@@ -55,7 +55,7 @@ def make_mtgapi_req(str, url, strict = false)
 end
 
 gatherer = Proc.new { |client, msg, channel |
-  res = make_mtgapi_req(msg, "http://api.mtgdb.info/search/[text]?limit=1")
+  res = make_mtgapi_req(msg, "http://api.deckbrew.com/mtg/cards/?name=[text]")
   begin
     response = JSON.parse(res)
   rescue JSON::ParserError => e
@@ -63,9 +63,10 @@ gatherer = Proc.new { |client, msg, channel |
     response = []
   end
   unless response == []
+    puts response
     client.send({type: "message",
                  channel: channel,
-                 text: "http://api.mtgdb.info/content/card_images/id.jpeg".sub('id', response[0]["id"].to_s) + "\n" + "```" + response[0]["description"] + "```"})
+                 text: response[0]['editions'][-1]['image_url'] + "\n" + "```" + response[0]["text"] + "```"})
 
   else client.send({type: "message",
                     channel: channel,
