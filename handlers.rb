@@ -93,13 +93,6 @@ gather_exact = Proc.new { |client, msg, channel |
   end
 }
 
-joseph = Proc.new { |client, msg, channel |
-  puts "called"
-  responses = ["OH MAI GAADUU!", "OHH GAADU!", "OHHH SHIITU!", "SON OF A BIITCHU!"]
-  client.send({type: "message",
-               channel: channel,
-               text: "http://i.imgur.com/TwHoamA.jpg\n" + responses.sample})
-}
 
 $handlers = {
   '(^hello,*\s*jojo(bot)?[\.!?]*)' => responder(["Hello to you too"]),
@@ -109,6 +102,5 @@ $handlers = {
   '(eh,*\s*jojo(bot)?\?|isn\'t\s+that\s+right,*\s*jojo(bot)?\?)' => responder(["Yeah!", "Sure", "...", "Nah", "Not really"]),
   '\[\[(.*?)\]\]' => gatherer,
   '\{\{(.*?)\}\}' => gather_exact,
-  '(omg|oh my god|holy shit)' => joseph
 }
 
